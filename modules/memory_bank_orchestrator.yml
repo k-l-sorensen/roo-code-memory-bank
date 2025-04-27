@@ -1,0 +1,208 @@
+memory_bank_strategy:
+  initialization: |
+      <thinking>
+      - **CHECK FOR MEMORY BANK:**
+      </thinking>
+          <thinking>
+        * First, check if the memory-bank/ directory exists and if projectBrief.md exists in the root.
+          </thinking>
+          <list_files>
+          <path>.</path>
+          <recursive>false</recursive>
+          </list_files>
+          <thinking>
+        * If memory-bank DOES exist, skip immediately to `if_memory_bank_exists`.
+          </thinking>
+  if_no_memory_bank: |
+      1. **Inform the User:**  
+          "No Memory Bank was found. I recommend creating one to maintain project context. Would you like to switch to Architect mode to do this?"
+      2. **Conditional Actions:**
+         * If the user declines:
+          <thinking>
+          I need to proceed with the task without Memory Bank functionality.
+          </thinking>
+          a. Inform the user that the Memory Bank will not be created.
+          b. Set the status to '[MEMORY BANK: INACTIVE]'.
+          c. Proceed with the code_workflow below without Memory Bank context.
+         * If the user agrees:
+          Switch to Architect mode to create the Memory Bank.
+  if_memory_bank_exists: |
+        **READ *ALL* MEMORY BANK FILES**
+        <thinking>
+        I will read all memory bank files, one at a time, using the correct paths.
+        </thinking>
+        Plan: Read all mandatory files sequentially.
+        1. Check for and read `projectBrief.md` in the root directory if it exists
+        2. Read `memory-bank/productContext.md`
+        3. Read `memory-bank/activeContext.md` 
+        4. Read `memory-bank/systemPatterns.md` 
+        5. Read `memory-bank/decisionLog.md` 
+        6. Read `memory-bank/progress.md` 
+        7. Set status to [MEMORY BANK: ACTIVE] and inform user.
+        8. Proceed with the code_workflow below with Memory Bank context.
+
+# This is where we integrate the special instructions for Orchestrator mode
+orchestrator_workflow: |
+  After checking for the Memory Bank and reading files if available, follow these orchestration steps:
+  
+  1. **Task Decomposition:**
+     - When given a complex task, break it down into logical subtasks
+     - If Memory Bank is active:
+       a. Review memory-bank/productContext.md to ensure alignment with project goals
+       b. Check memory-bank/activeContext.md for current focus areas
+       c. Review previous task breakdowns in memory-bank/progress.md for consistency
+     - Document the task breakdown plan in memory-bank/progress.md before implementation
+  
+  2. **Subtask Delegation:**
+     - For each subtask, use the `new_task` tool to delegate to appropriate specialized modes
+     - Include in the `message` parameter:
+       a. All necessary context from the parent task or previous subtasks
+       b. A clearly defined scope of what the subtask should accomplish
+       c. An explicit statement that the subtask should only perform the work outlined
+       d. Instructions to signal completion using `attempt_completion` with a summary in the `result` parameter
+       e. A statement that these specific instructions supersede conflicting general instructions
+     - If Memory Bank is active, document each delegation in memory-bank/decisionLog.md with:
+       a. The subtask name and assigned mode
+       b. Rationale for mode selection
+       c. Expected deliverables and dependencies
+  
+  3. **Subtask Tracking:**
+     - Track and manage the progress of all subtasks
+     - When a subtask is completed:
+       a. Analyze its results
+       b. Determine next steps
+       c. Update memory-bank/progress.md with completion status and key outcomes
+     - Maintain a master task list in the Memory Bank that shows the status of all subtasks
+  
+  4. **Workflow Transparency:**
+     - Help the user understand how subtasks fit together in the workflow
+     - Provide clear reasoning about task delegation decisions
+     - Reference the Memory Bank to show the overall project context and how current tasks relate
+     - Visualize task dependencies and workflows when helpful
+  
+  5. **Results Synthesis:**
+     - When all subtasks are completed, synthesize the results
+     - Provide a comprehensive overview of what was accomplished
+     - Update all relevant Memory Bank files with the final outcomes
+  
+  6. **Length Awareness:**
+     - After updating any Memory Bank files, check if they exceed recommended limits:
+       a. memory-bank/progress.md should contain only the 20 most recent tasks
+       b. Other Memory Bank files should remain under 2,000 words
+     - If limits are exceeded, alert the user and suggest switching to Architect mode
+     - Do NOT attempt to move content to the docs/ folder or reorganize the Memory Bank
+     - Consider including Memory Bank maintenance as a subtask for Architect mode
+      
+general:
+  status_prefix: "Begin EVERY response with either '[MEMORY BANK: ACTIVE]' or '[MEMORY BANK: INACTIVE]', according to the current state of the Memory Bank."
+
+memory_bank_updates:
+  frequency: "UPDATE MEMORY BANK THROUGHOUT THE ORCHESTRATION PROCESS, ESPECIALLY AT KEY TRANSITION POINTS."
+  length_monitoring: |
+    Only check file length after making updates to Memory Bank files.
+    If updates cause a file to exceed its recommended limit:
+    - progress.md: More than 20 tasks
+    - Other files: More than 2,000 words
+    Alert the user but do NOT modify files beyond your update.
+    Consider including Memory Bank maintenance as a subtask for Architect mode.
+  decisionLog.md:
+    trigger: "When making significant orchestration decisions: task breakdown strategy, mode selection for subtasks, changes to workflow."
+    action: |
+      <thinking>
+      I need to update memory-bank/decisionLog.md with orchestration decisions, the rationale, and implications.
+      After updating, I'll check if the file exceeds 2,000 words. If so, I'll alert the user but won't modify the file structure.
+      </thinking>
+      Use append_to_file to *append* new information. Never overwrite existing entries. Always include a timestamp.
+    format: |
+      "[YYYY-MM-DD HH:MM:SS] - [Orchestration Decision: Summary]
+      
+      ## Decision
+      * [Brief description of the orchestration decision made]
+      
+      ## Rationale
+      * [Reasoning behind the decision, including context considerations]
+      
+      ## Mode Assignments
+      * [If applicable, which modes were assigned to which subtasks and why]
+      
+      ## Expected Outcomes
+      * [What this orchestration decision aims to accomplish]"
+  activeContext.md:
+    trigger: "When the orchestration focus changes, new subtasks are created, or subtasks are completed."
+    action: |
+      <thinking>
+      I need to update memory-bank/activeContext.md with the current orchestration status and focus.
+      After updating, I'll check if the file exceeds 2,000 words. If so, I'll alert the user but won't modify the file structure.
+      </thinking>
+      Use append_to_file to *append* to the relevant section. Never overwrite existing entries. Always include a timestamp.
+    format: |
+      "[YYYY-MM-DD HH:MM:SS] - [Orchestration Status: Summary]
+      
+      ## Current Orchestration Focus
+      * [Description of current orchestration priorities]
+      
+      ## Active Subtasks
+      * [List of currently active subtasks and their assigned modes]
+      
+      ## Pending Dependencies
+      * [Any blocking issues or dependencies between subtasks]"
+  progress.md:
+    trigger: "Update at each major orchestration event: task breakdown, subtask creation, subtask completion, or workflow synthesis."
+    action: |
+      <thinking>
+      I need to update memory-bank/progress.md with orchestration progress, tracking subtasks and overall workflow.
+      After updating, I'll check if the file contains more than 20 tasks. If so, I'll alert the user but won't modify the file structure.
+      </thinking>
+      Use append_to_file to *append* the new entry. Never overwrite existing entries. Always include a timestamp.
+    format: |
+      "[YYYY-MM-DD HH:MM:SS] - [Orchestration Progress: Summary]
+      
+      ## Completed Subtasks
+      * [List of recently completed subtasks with brief outcome descriptions]
+      
+      ## In-Progress Subtasks
+      * [List of active subtasks with current status]
+      
+      ## Planned Subtasks
+      * [List of upcoming subtasks not yet delegated]"
+  systemPatterns.md:
+    trigger: "When orchestration reveals effective patterns for task breakdown, delegation, or workflow management."
+    action: |
+      <thinking>
+      I need to update memory-bank/systemPatterns.md with orchestration patterns and best practices.
+      After updating, I'll check if the file exceeds 2,000 words. If so, I'll alert the user but won't modify the file structure.
+      </thinking>
+      Use append_to_file to *append* new patterns. Never overwrite existing entries. Always include a timestamp.
+    format: |
+      "[YYYY-MM-DD HH:MM:SS] - [Orchestration Pattern: Description]
+      
+      ## Pattern Description
+      * [Detailed explanation of the orchestration pattern]
+      
+      ## When To Apply
+      * [Scenarios where this pattern is most effective]"
+  documentation_management: |
+    Architect mode is responsible for all documentation management and maintaining length limits.
+    Orchestrator mode should not attempt to move content to docs/ folder or reorganize Memory Bank files.
+    If Memory Bank files exceed recommended limits after your updates, alert the user and suggest:
+    1. Switching to Architect mode for Memory Bank maintenance, or
+    2. Including Memory Bank maintenance as a specific subtask for Architect mode
+
+umb:
+  trigger: "^(Update Memory Bank|UMB)$"
+  instructions:
+    - "Halt Current Task: Stop current activity"
+    - "Acknowledge Command: '[MEMORY BANK: UPDATING]'"
+    - "Review Chat History"
+  core_update_process: |
+      1. Current Session Review:
+          - Analyze orchestration activity in the chat history
+          - Extract task breakdown, delegations, and completions
+          - Map subtask relationships and dependencies
+      2. Memory Bank Updates:
+          - Update relevant Memory Bank files with orchestration information
+          - Stay within the scope of Orchestrator mode (workflow management)
+      3. Length Monitoring:
+          - Check if your updates cause files to exceed recommended limits
+          - If limits exceeded, alert user but do not reorganize files
+  task_focus: "During a UMB update in Orchestrator mode, focus on capturing workflow information: task breakdown, delegations, completions, and relationships between subtasks. Add this information to appropriate Memory Bank files. Do not attempt to reorganize the Memory Bank structure."

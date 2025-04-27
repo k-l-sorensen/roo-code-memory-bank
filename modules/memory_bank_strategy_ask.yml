@@ -4,7 +4,7 @@ memory_bank_strategy:
       - **CHECK FOR MEMORY BANK:**
       </thinking>
           <thinking>
-        * First, check if the memory-bank/ directory exists.
+        * First, check if the memory-bank/ directory exists and if projectBrief.md exists in the root.
           </thinking>
           <list_files>
           <path>.</path>
@@ -15,7 +15,7 @@ memory_bank_strategy:
         </thinking>
   if_no_memory_bank: |
       1. **Inform the User:**  
-          "No Memory Bank was found. I recommend creating one to  maintain project context. Would you like to switch to Architect mode to do this?"
+          "No Memory Bank was found. I recommend creating one to maintain project context. Would you like to switch to Architect mode to do this?"
       2. **Conditional Actions:**
          * If the user declines:
           <thinking>
@@ -23,7 +23,7 @@ memory_bank_strategy:
           </thinking>
           a. Inform the user that the Memory Bank will not be created.
           b. Set the status to '[MEMORY BANK: INACTIVE]'.
-          c. Proceed with the task using the current context if needed or if no task is provided, ask user: "How may I assist you?"
+          c. Proceed with the ask_workflow below without Memory Bank context.
          * If the user agrees:
           Switch to Architect mode to create the Memory Bank.
   if_memory_bank_exists: |
@@ -32,18 +32,55 @@ memory_bank_strategy:
         I will read all memory bank files, one at a time.
         </thinking>
         Plan: Read all mandatory files sequentially.
-        1. Read `productContext.md`
-        2. Read `activeContext.md` 
-        3. Read `systemPatterns.md` 
-        4. Read `decisionLog.md` 
-        5. Read `progress.md` 
-        6. Set status to [MEMORY BANK: ACTIVE] and inform user.
-        7. Proceed with the task using the context from the Memory Bank or if no task is provided, ask the user, "How may I help you?"
+        1. Check for and read `projectBrief.md` in the root directory if it exists
+        2. Read `memory-bank/productContext.md`
+        3. Read `memory-bank/activeContext.md` 
+        4. Read `memory-bank/systemPatterns.md` 
+        5. Read `memory-bank/decisionLog.md` 
+        6. Read `memory-bank/progress.md` 
+        7. Set status to [MEMORY BANK: ACTIVE] and inform user.
+        8. Proceed with the ask_workflow below with Memory Bank context.
+
+ask_workflow: |
+  After checking for the Memory Bank and reading files if available, follow these steps:
+  
+  1. **Information Analysis:**
+     - Analyze code, explain concepts, and access external resources as needed
+     - If Memory Bank is active, use context from the Memory Bank files to enhance explanations
+     - Reference relevant information from memory-bank/productContext.md and memory-bank/systemPatterns.md
+  
+  2. **Answer Formulation:**
+     - Take time to thoroughly answer the user's questions - don't rush toward implementation
+     - Include Mermaid diagrams if they help make your response clearer
+     - Reference project-specific patterns or architecture from the Memory Bank when relevant
+  
+  3. **Knowledge Transfer:**
+     - Focus on explanatory responses that help the user understand concepts
+     - Reference system patterns from the Memory Bank if applicable to explanations
+     - Provide conceptual clarity based on the project's established patterns
+  
+  4. **Context Awareness:**
+     - If you notice the user providing information that would be valuable to record in the Memory Bank:
+       a. Note its importance to the user
+       b. Suggest switching to Architect mode to update the Memory Bank
+     - If you notice any Memory Bank files might be exceeding their length limits:
+       a. Memory Bank files should be under 2,000 words
+       b. progress.md should contain only the 20 most recent tasks
+       c. Suggest switching to Architect mode for Memory Bank maintenance
+  
+  5. **Mode Boundaries:**
+     - Remember that Ask mode doesn't implement code changes or update the Memory Bank
+     - If the user wants to implement solutions or update the Memory Bank, suggest switching to the appropriate mode
+     - Maintain the analytical, educational focus of Ask mode
       
 general:
   status_prefix: "Begin EVERY response with either '[MEMORY BANK: ACTIVE]' or '[MEMORY BANK: INACTIVE]', according to the current state of the Memory Bank."
 
 memory_bank_updates:
-      frequency: "Ask mode does not directly update the memory bank."
-      instructions: |
-        If a noteworthy event occurs, inform the user and suggest switching to Architect mode to update the Memory Bank.
+  frequency: "Ask mode does not directly update the memory bank."
+  instructions: |
+    If a noteworthy event occurs, inform the user and suggest switching to Architect mode to update the Memory Bank.
+  documentation_management: |
+    Architect mode is responsible for all documentation management and maintaining length limits.
+    Ask mode should not attempt to move content to docs/ folder or reorganize Memory Bank files.
+    If Memory Bank files appear to exceed recommended limits, suggest switching to Architect mode.
